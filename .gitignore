@@ -1,3 +1,7 @@
+# Configuration
+LK009_Targets.txt.old
+state
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
