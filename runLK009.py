@@ -23,6 +23,9 @@ from lsl.common.stations import lwa1
 from lsl.common import sdf as lslsdf
 from lsl.common.mcs import mjdmpm2datetime as mjd2dt, datetime2mjdmpm as dt2mjd
 
+from lwa_mcs.tp import schedule_sdfs
+from lwa_mcs.utils import schedule_at_command
+
 
 _CATALOG_FILENAME = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'LK009_Pulsars.txt')
 
@@ -180,67 +183,6 @@ def get_available_space(user, buffer_factor=0.8, min_free_tb=2.0):
     space = min([space*buffer_factor, space-min_free_tb*1024**4])
     space = max([0, space])
     return space / _SPACE_CONVERSION_RATE
-
-
-def scheduleAtCommand(executionTime, command, systemTZ=MST):
-    """
-    Simple function to schedule a command to run at the provided time using
-    the 'at' command.  The job ID is returned as an integer.  This function 
-    takes care of all of the time zone conversion problems (as handled via 
-    the 'systemTZ' keyword) and also works with Python .py commands.
-
-    Supported execution time formats are:
-      * float or integer - UNIX timestamp
-      * naive datetime instance - assumed to be in UTC
-      * aware datetime instance
-
-    Supported commands are:
-      * anything that works with the '-f' option of 'at' without arguments
-      * anything that is a Python script ending in .py
-    """
-
-    # Time conversion
-    ## Does the the execution time look like a time stamp?
-    if type(executionTime) in (float, int):
-        executionTime = datetime.utcfromtimestamp(executionTime)
-    ## Has the execution time already had a time zone assigned to it?
-    if executionTime.tzinfo is None:
-        executionTime = UTC.localize(executionTime)
-    ## Convert to the systems's timezone	
-    executionTime = executionTime.astimezone(systemTZ)
-
-    # Command processing
-    # Read the command and figure out the working directory to use
-    cwd, name = os.path.split(command)
-    ## Is the command to be executed a Python script?
-    isPython = False
-    if command.find('.py') != -1:
-        isPython = True
-        cwd, name = os.path.split(command.split('.py', 1)[0])
-        name = "%s.py" % name
-        
-    # Schedule
-    ## Build up the command sequence
-    if isPython:
-        echoc = subprocess.Popen(['/bin/echo', 'python %s' % (command,)], stdout=subprocess.PIPE)
-        echoc.wait()
-        atc = subprocess.Popen(['/usr/bin/at',  "%s" % executionTime.strftime("%H:%M %m/%d/%Y")], 
-                                cwd=cwd, stdin=echoc.stdout, stderr=subprocess.PIPE)
-    else:
-        atc = subprocess.Popen(['/usr/bin/at', "%s" % executionTime.strftime("%H:%M %m/%d/%Y"), "-f", name], 
-                                cwd=cwd, stderr=subprocess.PIPE)
-    ## Execute						
-    atco, atce = atc.communicate()
-    ## Interpret the results
-    jobInfo = atce.split('\n')[-2]
-    jobID = jobInfo.split(None, 2)[1]
-    try:
-        jobID = int(jobID)
-    except ValueError:
-        jobID = -1
-        
-    # Done
-    return jobID
 
 
 def main(args):
@@ -443,55 +385,16 @@ def main(args):
             
     # Submit the SDFs
     print("Submitting SDFs for scheduling")
-    if not args.dry_run and filenames:
-        for filename in filenames:
-            tpss = subprocess.Popen(['./tpss', filename, '5', '0', 'mbox'], 
-                                    cwd='/home/op1/MCS/tp', stdin=None, stdout=None)
-            tpss.wait()
-            time.sleep(0.5)
+    if not args.dry_run and filenames
+        bi = busy.BusyIndicator(message="'waiting'")
+        bi.start()
+        success = schedule_sdfs(filenames)
+        bi.stop()
+        if not success:
+            print("There seems to be an issue with scheduling the SDFs, giving up!")
+            print("Script is aborted!")
+            sys.exit(1)
             
-    # Verify that the SDFs made it into the queue
-    bi = busy.BusyIndicator(message="'waiting'")
-    bi.start()
-    if not args.dry_run and filenames:
-        scheduled = False
-        counter = 0
-        while not scheduled:
-            time.sleep(30)
-            sids = []
-            infile = open('/home/op1/MCS/tp/mbox/mesq.dat', 'r')
-            for line in infile:
-                line = line.split()
-                if line[2] == 'LK009':
-                    sids.append(int(line[3]))
-            infile.close()
-            
-            missing_sids = []
-            for sid in fileids:
-                if sid not in sids:
-                    missing_sids.append(sid)
-                    
-            if not missing_sids:
-                scheduled = True
-            else:
-                bi.stop()
-                print("Resubmitting %i SDFs" % len(missing_sids))
-                bi.start()
-                for sid in missing_sids:
-                    filename = filenames[fileids.index(sid)]
-                    tpss = subprocess.Popen(['./tpss', filename, '5', '0', 'mbox'], 
-                                            cwd='/home/op1/MCS/tp', stdin=None, stdout=None)
-                    tpss.wait()
-                    time.sleep(0.5)
-                    
-            counter += 1
-            if counter > 10:
-                bi.stop()
-                print("There seems to be an issue with scheduling the SDFs, giving up!")
-                print("Script is aborted!")
-                sys.exit(1)      
-    bi.stop()
-
     print("SDFs successfully scheduled")
     if not args.dry_run:
         # Write out new session id
@@ -613,7 +516,7 @@ def main(args):
     atIDs = []
     for cmd in atCommands:
         if not args.dry_run:
-            atID = scheduleAtCommand(*cmd)
+            atID = schedule_at_command(*cmd)
         else:
             atID = -1
         atIDs.append(atID)
