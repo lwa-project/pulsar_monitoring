@@ -385,7 +385,7 @@ def main(args):
             
     # Submit the SDFs
     print("Submitting SDFs for scheduling")
-    if not args.dry_run and filenames
+    if not args.dry_run and filenames:
         bi = busy.BusyIndicator(message="'waiting'")
         bi.start()
         success = schedule_sdfs(filenames)
