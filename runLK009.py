@@ -177,8 +177,11 @@ def get_available_space(user, buffer_factor=0.8, min_free_tb=2.0):
     
     df = subprocess.Popen(['ssh', 'mcsdr@lwaucf1', "df -BG /data/network/recent_data/%s" % user], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     space, err = df.communicate()
-    space = space.split('\n')[-2]
-    space = space.split(None, 5)[3][:-1]
+    try:
+        space = space.split('\n')[-2]
+        space = space.split(None, 5)[3][:-1]
+    except IndexError:
+        space = "0"
     space = int(space, 10)*1024**3
     space = min([space*buffer_factor, space-min_free_tb*1024**4])
     space = max([0, space])
