@@ -21,7 +21,7 @@ from lsl import astro
 from lsl.common import busy
 from lsl.common.stations import lwa1
 from lsl.common import sdf as lslsdf
-from lsl.common.mcs import mjdmpm2datetime as mjd2dt, datetime2mjdmpm as dt2mjd
+from lsl.common.mcs import mjdmpm_to_datetime as mjd2dt, datetime_to_mjdmpm as dt2mjd
 
 from lwa_mcs.tp import schedule_sdfs
 from lwa_mcs.utils import schedule_at_command
@@ -40,7 +40,7 @@ class Pulsar(ephem.FixedBody):
     and a few helper methods for determining when things can be observed.
     """
     
-    obs = lwa1.getObserver()    # defaults to LWA1
+    obs = lwa1.get_observer()    # defaults to LWA1
     
     _padding = 10    # total session padding time in seconds
         
@@ -197,7 +197,7 @@ def main(args):
     print("  Window is %.3f hr long" % ((stop-start).total_seconds()/3600.0,))
     
     # Get the observer and convert to LST
-    obs = lwa1.getObserver()
+    obs = lwa1.get_observer()
     obs.date = start.strftime('%Y/%m/%d %H:%M:%S')
     lst_start = obs.sidereal_time()
     obs.date = stop.strftime('%Y/%m/%d %H:%M:%S')
@@ -364,18 +364,18 @@ def main(args):
                               bdy._ra, bdy._dec, 
                               35.1e6 if b == 0 else 64.5e6, 
                               49.8e6 if b == 0 else 79.2e6, 
-                              7, MaxSNR=False)                  
+                              7, max_snr=False)                  
             sess = lslsdf.Session('%s, beam %i' % (bdy.name, beam), session_id, [targ,])
             sess.setDRXBeam(beam)
-            sess.setDataReturnMethod('UCF')
-            sess.setUCFUsername("pulsar/LK009/%s" % bdy.name)
+            sess.data_return_method = 'UCF'
+            sess.ucf_username = "pulsar/LK009/%s" % bdy.name
             proj = lslsdf.Project(lslobs, 'Continued Regular Monitoring of Pulsars with LWA1', 'LK009', [sess,])
             sdf = proj.render(verbose=False)
             
             if not args.dry_run:
                 filename = '%s_%s_%s_%04d_B%i.sdf' % (proj.id, bdy_start.strftime("%y%m%d"), 
                                                       bdy_start.strftime("%H%M"), 
-                                                      sess.id, sess.drxBeam)
+                                                      sess.id, sess.drx_beam)
                 filename = os.path.join(sdf_dir, filename)
                 
                 fh = open(filename, 'w')
