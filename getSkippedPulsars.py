@@ -15,7 +15,7 @@ import shutil
 import argparse
 from datetime import datetime
 
-from lsl.common.mcs import datetime2mjdmpm as dt2mjd
+from lsl.common.mcs import datetime_to_mjdmpm as dt2mjd
 
 from runLK009 import _CATALOG_FILENAME, Pulsar
 
