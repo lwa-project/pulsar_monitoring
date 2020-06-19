@@ -366,7 +366,7 @@ def main(args):
                               49.8e6 if b == 0 else 79.2e6, 
                               7, max_snr=False)                  
             sess = lslsdf.Session('%s, beam %i' % (bdy.name, beam), session_id, [targ,])
-            sess.setDRXBeam(beam)
+            sess.drx_beam = beam
             sess.data_return_method = 'UCF'
             sess.ucf_username = "pulsar/LK009/%s" % bdy.name
             proj = lslsdf.Project(lslobs, 'Continued Regular Monitoring of Pulsars with LWA1', 'LK009', [sess,])
