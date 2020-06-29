@@ -1,10 +1,8 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """
 Script to help schedule LK009 observations during idle windows.
 """
-
-from __future__ import print_function
 
 import os
 import sys
@@ -31,7 +29,6 @@ _CATALOG_FILENAME = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'LK
 
 
 UTC = pytz.utc
-MST = pytz.timezone('America/Denver')
 
 
 class Pulsar(ephem.FixedBody):

@@ -1,10 +1,8 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """
 Script to help manage the LK009 pulsar database.
 """
-
-from __future__ import print_function
 
 import os
 import sys
