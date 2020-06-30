@@ -12,6 +12,7 @@ import numpy
 import shutil
 import argparse
 import subprocess
+from io import IOBase
 from datetime import datetime, timedelta
 import pytz
 
@@ -75,7 +76,7 @@ class Pulsar(ephem.FixedBody):
         Similar to to_line(), but writes to an open file handle.
         """
         
-        if not isinstance(fh, file):
+        if not isinstance(fh, IOBase):
             raise TypeError("Expected an open filehandle")
         fh.write("%s\n" % self.to_line())
         
