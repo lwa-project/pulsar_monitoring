@@ -391,7 +391,7 @@ def main(args):
     if not args.dry_run and filenames:
         bi = busy.BusyIndicator(message="'waiting'")
         bi.start()
-        success = schedule_sdfs(filenames)
+        success = schedule_sdfs(filenames, max_retries=10)
         bi.stop()
         if not success:
             print("There seems to be an issue with scheduling the SDFs, giving up!")
