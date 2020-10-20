@@ -173,7 +173,7 @@ def get_available_space(user, buffer_factor=0.8, min_free_tb=2.0):
     can be stored given the current level of disk usage in /data/network.
     """
     
-    df = subprocess.Popen(['ssh', 'mcsdr@lwaucf1', "df -BG /data/network/recent_data/%s" % user], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    df = subprocess.Popen(['ssh', 'mcsdr@lwaucf0', "df -BG /data/network/recent_data/%s" % user], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     space, err = df.communicate()
     space = space.decode()
     err = err.decode()
@@ -228,7 +228,6 @@ def main(args):
         bdy = Pulsar.from_line(line)
         bdys.append(bdy)
     print('Loaded %i targets' % len(bdys))
-    
     ## Sort the pulsars by hour angle
     #ha_start = lst_start - max([bdy.duration for bdy in bdys])/86400.0*2*numpy.pi
     #if ha_start < 0:
@@ -413,7 +412,7 @@ def main(args):
                 if opt.cadence <= 0 and bdy.within_beam(opt):
                     print("  Note: observation of %s also contains %s" % (bdy.name, opt.name))
                     opt.last_mjd = bdy.last_mjd
-                    
+
         # Backup the catalog and write out the new version
         shutil.copy(_CATALOG_FILENAME, _CATALOG_FILENAME+'.old')
         fh = open(_CATALOG_FILENAME, 'w')
