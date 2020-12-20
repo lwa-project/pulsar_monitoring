@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-Script to help schedule LK009 observations during idle windows.
+Script to help schedule LK011 observations during idle windows.
 """
 
 import os
@@ -192,7 +192,7 @@ def main(args):
     # Get the start and stop times for the window that we are scheduling
     start = datetime.strptime('%s %s' % (args.start_date, args.start_time), '%Y/%m/%d %H:%M:%S')
     stop  = datetime.strptime('%s %s' % (args.stop_date, args.stop_time), '%Y/%m/%d %H:%M:%S')
-    print("Scheduling LK009 for %s to %s" % (start.strftime('%Y/%m/%d %H:%M:%S'),  
+    print("Scheduling LK011 for %s to %s" % (start.strftime('%Y/%m/%d %H:%M:%S'),  
                                              stop.strftime('%Y/%m/%d %H:%M:%S')))
     print("  Window is %.3f hr long" % ((stop-start).total_seconds()/3600.0,))
     
@@ -368,8 +368,8 @@ def main(args):
             sess = lslsdf.Session('%s, beam %i' % (bdy.name, beam), session_id, [targ,])
             sess.drx_beam = beam
             sess.data_return_method = 'UCF'
-            sess.ucf_username = "pulsar/LK009/%s" % bdy.name
-            proj = lslsdf.Project(lslobs, 'Continued Regular Monitoring of Pulsars with LWA1', 'LK009', [sess,])
+            sess.ucf_username = "pulsar/LK011/%s" % bdy.name
+            proj = lslsdf.Project(lslobs, 'Continued Regular Monitoring of Pulsars with LWA1', 'LK011', [sess,])
             sdf = proj.render(verbose=False)
             
             if not args.dry_run:
@@ -549,7 +549,7 @@ def main(args):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Schedule LK009 observations')
+    parser = argparse.ArgumentParser(description='Schedule LK011 observations')
     parser.add_argument('start_date', type=str, 
                         help='scheduling window UTC start date in YYYY/MM/DD format')
     parser.add_argument('start_time', type=str,
