@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-Script to help schedule LK009 observations during idle windows.
+Script to help schedule LWA pulsar monitoring observations during idle windows.
 """
 
 import os
@@ -26,7 +26,15 @@ from lwa_mcs.tp import schedule_sdfs
 from lwa_mcs.utils import schedule_at_command
 
 
-_CATALOG_FILENAME = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'LK009_Pulsars.txt')
+# Pulsar catalog location
+_CATALOG_FILENAME = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'Pulsar_Catalog.txt')
+
+
+# Obsever and project information
+_OBSERVER_NAME = 'Pratik Kumar'
+_OBSERVER_ID = 82
+_PROJECT_NAME = 'Continued Regular Monitoring of Pulsars with LWA1'
+_PROJECT_ID = 'LK011'
 
 
 UTC = pytz.utc
@@ -192,8 +200,9 @@ def main(args):
     # Get the start and stop times for the window that we are scheduling
     start = datetime.strptime('%s %s' % (args.start_date, args.start_time), '%Y/%m/%d %H:%M:%S')
     stop  = datetime.strptime('%s %s' % (args.stop_date, args.stop_time), '%Y/%m/%d %H:%M:%S')
-    print("Scheduling LK009 for %s to %s" % (start.strftime('%Y/%m/%d %H:%M:%S'),  
-                                             stop.strftime('%Y/%m/%d %H:%M:%S')))
+    print("Scheduling pulsar monitoring (%s) for %s to %s" % (_PROJECT_ID,
+                                                              start.strftime('%Y/%m/%d %H:%M:%S'),  
+                                                              stop.strftime('%Y/%m/%d %H:%M:%S')))
     print("  Window is %.3f hr long" % ((stop-start).total_seconds()/3600.0,))
     
     # Get the observer and convert to LST
@@ -338,8 +347,13 @@ def main(args):
     # Load in the next session ID
     try:
         fh = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'state'), 'r')
-        session_id = int(fh.read(), 10)
+        line = fh.read()
+        old_project_id, session_id = line.split(None, 1)
+        session_id = int(session_id, 10)
         fh.close()
+        ## Check so that we can reset the session ID whenever the project code changes
+        if old_project_id != _PROJECT_ID:
+            raise ValueError
     except (IOError, ValueError):
         session_id = 1
         
@@ -352,7 +366,7 @@ def main(args):
             
     # Build the observations
     fileids, filenames = [], []
-    lslobs = lslsdf.Observer('Pratik Kumar', 82)
+    lslobs = lslsdf.Observer(_OBSERVER_NAME, _OBSERVER_ID)
     for bdy in bdys_run:
         bdy_start, bdy_stop = bdy.final
         bdy_start = UTC.localize(bdy_start)
@@ -367,8 +381,8 @@ def main(args):
             sess = lslsdf.Session('%s, beam %i' % (bdy.name, beam), session_id, [targ,])
             sess.drx_beam = beam
             sess.data_return_method = 'UCF'
-            sess.ucf_username = "pulsar/LK009/%s" % bdy.name
-            proj = lslsdf.Project(lslobs, 'Continued Regular Monitoring of Pulsars with LWA1', 'LK009', [sess,])
+            sess.ucf_username = "pulsar/%s/%s" % (_PROJECT_ID, bdy.name)
+            proj = lslsdf.Project(lslobs, _PROJECT_NAME, _PROJECT_ID, [sess,])
             sdf = proj.render(verbose=False)
             
             if not args.dry_run:
@@ -401,7 +415,7 @@ def main(args):
     if not args.dry_run:
         # Write out new session id
         fh = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'state'), 'w')
-        fh.write("%i\n" % session_id)
+        fh.write("%s %i\n" % (_PROJECT_ID, session_id))
         fh.close()
         
         # Update list to get it ready to write back out.  In the process, deal with any 
@@ -548,7 +562,7 @@ def main(args):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Schedule LK009 observations')
+    parser = argparse.ArgumentParser(description='Schedule LWA pulsar monitoring observations')
     parser.add_argument('start_date', type=str, 
                         help='scheduling window UTC start date in YYYY/MM/DD format')
     parser.add_argument('start_time', type=str,

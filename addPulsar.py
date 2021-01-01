@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-Script to help manage the LK009 pulsar database.
+Script to help manage the LWA pulsar monitoring database.
 """
 
 import os
@@ -13,7 +13,7 @@ import shutil
 import argparse
 from datetime import datetime
 
-from runLK009 import _CATALOG_FILENAME, Pulsar
+from runPulsarMonitoring import _CATALOG_FILENAME, _PROJECT_ID, Pulsar
 
 
 def main(args):
@@ -97,11 +97,11 @@ def main(args):
         ## Reminder
         print("")
         print("NOTE: Please remember to make the following directory on the UCF:")
-        print("      /data/network/recent_data/kstovall/LK009/%s" % args.name)
+        print("      /data/network/recent_data/pulsar/%s/%s" % (_PROJECT_ID, args.name))
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Add a pulsar to the LK009 observations')
+    parser = argparse.ArgumentParser(description='Add a pulsar to the LWA pulsar monitoring observations')
     parser.add_argument('-n', '--name', type=str, 
                         help='pulsar name')
     parser.add_argument('-r', '--ra', type=str, 
