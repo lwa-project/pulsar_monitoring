@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-Script to help manage the LK009 pulsar database.
+Script to help manage the LWA pulsar monitoring database.
 """
 
 import os
@@ -15,7 +15,7 @@ from datetime import datetime
 
 from lsl.common.mcs import datetime_to_mjdmpm as dt2mjd
 
-from runLK009 import _CATALOG_FILENAME, Pulsar
+from runPulsarMonitoring import _CATALOG_FILENAME, Pulsar
 
 
 def main(args):
