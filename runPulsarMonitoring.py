@@ -415,7 +415,7 @@ def main(args):
             fh = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'runtime.log'), 'a')
             fh.write("Failed Scheduling for UTC %s to %s\n" % (orig_start.strftime('%Y/%m/%d %H:%M:%S'), 
                                                                orig_stop.strftime('%Y/%m/%d %H:%M:%S')))
-            fh.write("  Scheduling Error:\n)
+            fh.write("  Scheduling Error:\n")
             try:
                 fh.write("    %s\n" % scheduling_error)
             except NameError:
