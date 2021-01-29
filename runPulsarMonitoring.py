@@ -24,6 +24,7 @@ from lsl.common.mcs import mjdmpm_to_datetime as mjd2dt, datetime_to_mjdmpm as d
 
 from lwa_mcs.tp import schedule_sdfs
 from lwa_mcs.utils import schedule_at_command
+from lwa_mcs.exc import cancel_observation
 
 
 # Pulsar catalog location
@@ -404,9 +405,30 @@ def main(args):
     if not args.dry_run and filenames:
         bi = busy.BusyIndicator(message="'waiting'")
         bi.start()
-        success = schedule_sdfs(filenames, max_retries=10)
+        try:
+            success = schedule_sdfs(filenames, max_retries=10)
+        except Exception as scheduling_error:
+            success = False
+            print("schedule_sdfs() failed with '%s'" % str(scheduling_error))
         bi.stop()
         if not success:
+            fh = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'runtime.log'), 'a')
+            fh.write("Failed Scheduling for UTC %s to %s\n" % (orig_start.strftime('%Y/%m/%d %H:%M:%S'), 
+                                                               orig_stop.strftime('%Y/%m/%d %H:%M:%S')))
+            fh.write("  Scheduling Error:\n)
+            try:
+                fh.write("    %s\n" % scheduling_error)
+            except NameError:
+                fh.write("    Too many failed attempts to schedule\n")
+            fh.close()
+            
+            for fileid in fileids:
+                try:
+                    cancel_observation(_PROJECT_ID, fileid, remove_metadata=True)
+                    print("  Removed session %i" % fileid)
+                except RuntimeError:
+                    pass
+                    
             print("There seems to be an issue with scheduling the SDFs, giving up!")
             print("Script is aborted!")
             sys.exit(1)
