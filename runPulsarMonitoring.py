@@ -485,12 +485,11 @@ def main(args):
     for i,freeWindow in enumerate(freeWindows):
         length = freeWindow[1] - freeWindow[0]
         
+        start_tbn = False
+        
         if length >= timedelta(minutes=45):
             ### Default TBN frequency, TBW health checks, and DRSU scans
-            if i == 0 or abs(freeWindow[0] - start) >= timedelta(minutes=3):
-                tTBN = freeWindow[0]
-                atCommands.append( (tTBN, '/home/op1/MCS/sch/startTBN_split.sh') )
-                
+            start_tbn = True
             tTBW = freeWindow[0] + timedelta(minutes=4)
             tTBW = tTBW.replace(second=0, microsecond=0)
             tDRSU = freeWindow[0] + timedelta(minutes=4)
@@ -519,6 +518,7 @@ def main(args):
                 
         elif length >= timedelta(minutes=15):
             ### TBW health checks and DRSU scans
+            start_tbn = True
             tTBW = freeWindow[0] + timedelta(minutes=4)
             tTBW = tTBW.replace(second=0, microsecond=0)
             tDRSU = freeWindow[0] + timedelta(minutes=4)
@@ -535,6 +535,7 @@ def main(args):
                 
         elif length >= timedelta(minutes=6):
             ### DRSU scans
+            start_tbn = True
             tDRSU = freeWindow[0] + timedelta(minutes=2)
             tDRSU = tDRSU.replace(second=0, microsecond=0)
             if tDRSU > tDRSULast + timedelta(hours=6):
@@ -547,9 +548,13 @@ def main(args):
             ### TBN start if it is the end of the session
             if i == len(freeWindows)-1:
                 if freeWindow[0] > max([bdy.final[1] for bdy in bdys_run]):
-                    tTBN = freeWindow[0]
-                    atCommands.append( (tTBN, '/home/op1/MCS/sch/startTBN_split.sh') )
+                    start_tbn = True
                     
+        if start_tbn
+            ### Start TBN
+            tTBN = freeWindow[0]
+            atCommands.append( (tTBN, '/home/op1/MCS/sch/startTBN_split.sh') )
+            
     ## Implement the commands
     atIDs = []
     for cmd in atCommands:
