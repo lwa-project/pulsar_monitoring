@@ -550,7 +550,7 @@ def main(args):
                 if freeWindow[0] > max([bdy.final[1] for bdy in bdys_run]):
                     start_tbn = True
                     
-        if start_tbn
+        if start_tbn:
             ### Start TBN
             tTBN = freeWindow[0]
             atCommands.append( (tTBN, '/home/op1/MCS/sch/startTBN_split.sh') )
