@@ -402,11 +402,12 @@ def main(args):
             
     # Submit the SDFs
     print("Submitting SDFs for scheduling")
+    logbase = 'tpss_%s' % (start.strftime("%Y%m%d_%H%M%S"),)
     if not args.dry_run and filenames:
         bi = busy.BusyIndicator(message="'waiting'")
         bi.start()
         try:
-            success = schedule_sdfs(filenames, max_retries=10)
+            success = schedule_sdfs(filenames, max_retries=10, logfile=logbase+'.log', errorfile=logbase+'.err')
         except Exception as scheduling_error:
             success = False
             print("schedule_sdfs() failed with '%s'" % str(scheduling_error))
