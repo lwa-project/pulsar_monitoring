@@ -35,7 +35,7 @@ _CATALOG_FILENAME = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'Pu
 _OBSERVER_NAME = 'Pratik Kumar'
 _OBSERVER_ID = 82
 _PROJECT_NAME = 'Continued Regular Monitoring of Pulsars with LWA1'
-_PROJECT_ID = 'LK014'
+_PROJECT_ID = 'LK018'
 
 
 UTC = pytz.utc
