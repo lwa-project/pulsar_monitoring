@@ -458,7 +458,7 @@ def main(args):
         fh.write('# Columns:                                 #\n')
         fh.write('#   1. Name                                #\n')
         fh.write('#   2. RA - HH:MM:SS.SS - J2000            #\n')
-        fh.write('#   3. Declication - sDD:MM:SS.S - J2000   #\n')
+        fh.write('#   3. Declination - sDD:MM:SS.S - J2000   #\n')
         fh.write('#   4. Observation Duration - hours        #\n')
         fh.write('#   5. Observing Cadence - days            #\n')
         fh.write('#   6. Last MJD Observed                   #\n')
