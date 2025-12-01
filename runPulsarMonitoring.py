@@ -284,7 +284,7 @@ def main(args):
     bdys_run.sort(key=lambda x: x.final[0])
     
     # Assign each observation set to beams
-    load = {2:0.0, 3:0.0, 4:0.0}
+    load = {1:0.0, 2:0.0, 3:0.0, 4:0.0}
     for bdy in bdys_run:
         beams = [lbp[1] for lbp in sorted([(load[b],b) for b in load])]
         bdy.beams = sorted((beams[0], beams[1]))
