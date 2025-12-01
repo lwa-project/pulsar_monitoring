@@ -474,33 +474,25 @@ def main(args):
     print("Scheduling other commands:")
     atCommands = []
     # Build up the commands
-    ## INIdp.sh calls at the start and end of each busy window
-    for i,busyWindow in enumerate(busyWindows):
-        tINI = busyWindow[0] - timedelta(minutes=20)
-        tINI = tINI.replace(second=0, microsecond=0)
-        atCommands.append( (tINI, '/home/op1/MCS/sch/INIdp.sh') )
     ## Maintenance commands for the station
-    tTBWLast = orig_start - timedelta(hours=12)
+    tHealthLast = orig_start - timedelta(hours=12)
     tDRSULast = orig_start - timedelta(hours=12)
     tLWADBLast = orig_start - timedelta(hours=12)
     for i,freeWindow in enumerate(freeWindows):
         length = freeWindow[1] - freeWindow[0]
         
-        start_tbn = False
-        
         if length >= timedelta(minutes=45):
-            ### Default TBN frequency, TBW health checks, and DRSU scans
-            start_tbn = True
-            tTBW = freeWindow[0] + timedelta(minutes=4)
-            tTBW = tTBW.replace(second=0, microsecond=0)
+            ### Health checks and DRSU scans
+            tHealth = freeWindow[0] + timedelta(minutes=4)
+            tHealth = tHealth.replace(second=0, microsecond=0)
             tDRSU = freeWindow[0] + timedelta(minutes=4)
             tDRSU = tDRSU.replace(second=0, microsecond=0)
             tLWADB = freeWindow[0] + timedelta(minutes=4)
             tLWADB = tLWADB.replace(second=0, microsecond=0)
-            while tTBW <= (freeWindow[1] - timedelta(minutes=6)):
-                if tTBW > tTBWLast + timedelta(hours=4):
-                    atCommands.append( (tTBW, '/home/op1/MCS/exec/acquireHealthCheckAndProcess.py') )
-                    tTBWLast = tTBW
+            while tHealth <= (freeWindow[1] - timedelta(minutes=6)):
+                if tHealth > tHealthLast + timedelta(hours=4):
+                    atCommands.append( (tHealth, '/home/op1/MCS/exec/acquireHealthCheckAndProcess.py') )
+                    tHealthLast = tHealth
                     
                 elif tDRSU > tDRSULast + timedelta(hours=6):
                     atCommands.append( (tDRSU, '/home/op1/MCS/sch/operatorScripts/selectBestDRSU.py --all') )
@@ -513,20 +505,19 @@ def main(args):
                         atCommands.append( (tLWADB, '/home/op1/MCS/sch/operatorScripts/scanDRSUs.sh') )
                         tLWADBLast = tLWADB + timedelta(hours=24)
                         
-                tTBW = tTBW + timedelta(minutes=15)
+                tHealth = tHealth + timedelta(minutes=15)
                 tDRSU = tDRSU + timedelta(minutes=15)
                 tLWADB = tLWADB + timedelta(minutes=15)
                 
         elif length >= timedelta(minutes=15):
-            ### TBW health checks and DRSU scans
-            start_tbn = True
-            tTBW = freeWindow[0] + timedelta(minutes=4)
-            tTBW = tTBW.replace(second=0, microsecond=0)
+            ### Health checks and DRSU scans
+            tHealth = freeWindow[0] + timedelta(minutes=4)
+            tHealth = tHealth.replace(second=0, microsecond=0)
             tDRSU = freeWindow[0] + timedelta(minutes=4)
             tDRSU = tDRSU.replace(second=0, microsecond=0)
-            if tTBW > tTBWLast + timedelta(hours=4):
-                atCommands.append( (tTBW, '/home/op1/MCS/exec/acquireHealthCheckAndProcess.py') )
-                tTBWLast = tTBW
+            if tHealth > tHealthLast + timedelta(hours=4):
+                atCommands.append( (tHealth, '/home/op1/MCS/exec/acquireHealthCheckAndProcess.py') )
+                tHealthLast = tHealth
                 
             elif tDRSU > tDRSULast + timedelta(hours=6):
                 atCommands.append( (tDRSU, '/home/op1/MCS/sch/operatorScripts/selectBestDRSU.py --all') )
@@ -536,7 +527,6 @@ def main(args):
                 
         elif length >= timedelta(minutes=6):
             ### DRSU scans
-            start_tbn = True
             tDRSU = freeWindow[0] + timedelta(minutes=2)
             tDRSU = tDRSU.replace(second=0, microsecond=0)
             if tDRSU > tDRSULast + timedelta(hours=6):
@@ -545,17 +535,6 @@ def main(args):
                 atCommands.append( (tDRSU, '/home/op1/MCS/sch/operatorScripts/postDRSUStatus.py') )
                 tDRSULast = tDRSU
                 
-        else:
-            ### TBN start if it is the end of the session
-            if i == len(freeWindows)-1:
-                if freeWindow[0] > max([bdy.final[1] for bdy in bdys_run]):
-                    start_tbn = True
-                    
-        if start_tbn:
-            ### Start TBN
-            tTBN = freeWindow[0]
-            atCommands.append( (tTBN, '/home/op1/MCS/sch/startTBN_split.sh') )
-            
     ## Implement the commands
     atIDs = []
     for cmd in atCommands:
@@ -603,4 +582,3 @@ if __name__ == "__main__":
                         help='perform a dry-run only')
     args = parser.parse_args()
     main(args)
-    
