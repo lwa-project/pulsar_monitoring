@@ -386,7 +386,7 @@ def main(args):
             proj = lslsdf.Project(lslobs, _PROJECT_NAME, _PROJECT_ID, [sess,])
             sdf = proj.render(verbose=False)
             
-            if not args.dry_run:
+            if not args.maintenance_only and not args.dry_run:
                 filename = '%s_%s_%s_%04d_B%i.sdf' % (proj.id, bdy_start.strftime("%y%m%d"), 
                                                       bdy_start.strftime("%H%M"), 
                                                       sess.id, sess.drx_beam)
@@ -435,7 +435,7 @@ def main(args):
             sys.exit(1)
             
     print("SDFs successfully scheduled")
-    if not args.dry_run:
+    if not args.maintenance_only and not args.dry_run:
         # Write out new session id
         fh = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'state'), 'w')
         fh.write("%s %i\n" % (_PROJECT_ID, session_id))
@@ -578,6 +578,8 @@ if __name__ == "__main__":
                         help='scheduling window UTC stop date in YYYY/MM/DD format')
     parser.add_argument('stop_time', type=str,
                         help='scheduling window UTC stop time in HH:MM:SS format')
+    parser.add_argument('-m', '--maintenance-only', action='store_true', 
+                        help='do not schedule observations but do schedule maintenance tasks')
     parser.add_argument('-n', '--dry-run', action='store_true', 
                         help='perform a dry-run only')
     args = parser.parse_args()
