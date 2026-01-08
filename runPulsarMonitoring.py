@@ -577,7 +577,7 @@ if __name__ == "__main__":
                         help='scheduling window UTC stop date in YYYY/MM/DD format')
     parser.add_argument('stop_time', type=str,
                         help='scheduling window UTC stop time in HH:MM:SS format')
-    parser.add_argument('-m', '--maintenance-only', action='store_false', 
+    parser.add_argument('-m', '--maintenance-only', action='store_true', 
                         help='do not schedule observations but do schedule maintenance tasks')
     parser.add_argument('-n', '--dry-run', action='store_true', 
                         help='perform a dry-run only')
