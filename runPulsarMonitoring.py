@@ -157,7 +157,7 @@ class Pulsar(ephem.FixedBody):
             bdy_start, bdy_stop = self.get_start_stop(start, stop, padding=True)
             if bdy_start >= start and bdy_stop <= stop:
                 return True
-        except ephem.NeverUp:
+        except ephem.NeverUpError:
             pass
         return False
             
@@ -201,6 +201,7 @@ def main(args):
     # Get the start and stop times for the window that we are scheduling
     start = datetime.strptime('%s %s' % (args.start_date, args.start_time), '%Y/%m/%d %H:%M:%S')
     stop  = datetime.strptime('%s %s' % (args.stop_date, args.stop_time), '%Y/%m/%d %H:%M:%S')
+    start, stop = UTC.localize(start), UTC.localize(stop)
     print("Scheduling pulsar monitoring (%s) for %s to %s" % (_PROJECT_ID,
                                                               start.strftime('%Y/%m/%d %H:%M:%S'),  
                                                               stop.strftime('%Y/%m/%d %H:%M:%S')))
@@ -370,8 +371,6 @@ def main(args):
     lslobs = lslsdf.Observer(_OBSERVER_NAME, _OBSERVER_ID)
     for bdy in bdys_run:
         bdy_start, bdy_stop = bdy.final
-        bdy_start = UTC.localize(bdy_start)
-        bdy_stop = UTC.localize(bdy_stop)
         
         for b,beam in enumerate(bdy.beams):
             targ = lslsdf.DRX(bdy.name, bdy.name, bdy_start, bdy_stop-bdy_start, 
@@ -578,7 +577,7 @@ if __name__ == "__main__":
                         help='scheduling window UTC stop date in YYYY/MM/DD format')
     parser.add_argument('stop_time', type=str,
                         help='scheduling window UTC stop time in HH:MM:SS format')
-    parser.add_argument('-m', '--maintenance-only', action='store_true', 
+    parser.add_argument('-m', '--maintenance-only', action='store_false', 
                         help='do not schedule observations but do schedule maintenance tasks')
     parser.add_argument('-n', '--dry-run', action='store_true', 
                         help='perform a dry-run only')
