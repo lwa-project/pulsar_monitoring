@@ -378,7 +378,7 @@ def main(args):
                               bdy._ra, bdy._dec, 
                               35.1e6 if b == 0 else 64.5e6, 
                               49.8e6 if b == 0 else 79.2e6, 
-                              7, max_snr=False)                  
+                              7, high_dr=False)                  
             sess = lslsdf.Session('%s, beam %i' % (bdy.name, beam), session_id, [targ,])
             sess.drx_beam = beam
             sess.data_return_method = 'UCF'
