@@ -11,7 +11,7 @@ import ephem
 import numpy
 import shutil
 import argparse
-from datetime import datetime
+from datetime import datetime, timezone
 
 from lsl.common.mcs import datetime_to_mjdmpm as dt2mjd
 
@@ -20,7 +20,7 @@ from runPulsarMonitoring import _CATALOG_FILENAME, Pulsar
 
 def main(args):
     # Get the current MJD
-    mjd, _ = dt2mjd(datetime.utcnow())
+    mjd, _ = dt2mjd(datetime.now(tz=timezone.utc))
     
     # Load in the target list
     ## Read

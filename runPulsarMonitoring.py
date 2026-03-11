@@ -13,8 +13,7 @@ import shutil
 import argparse
 import subprocess
 from io import IOBase
-from datetime import datetime, timedelta
-import pytz
+from datetime import datetime, timedelta, timezone
 
 from lsl import astro
 from lsl.common import busy
@@ -36,9 +35,6 @@ _OBSERVER_NAME = 'Pratik Kumar'
 _OBSERVER_ID = 82
 _PROJECT_NAME = 'Continued Regular Monitoring of Pulsars with LWA1'
 _PROJECT_ID = 'LK018'
-
-
-UTC = pytz.utc
 
 
 class Pulsar(ephem.FixedBody):
@@ -201,7 +197,7 @@ def main(args):
     # Get the start and stop times for the window that we are scheduling
     start = datetime.strptime('%s %s' % (args.start_date, args.start_time), '%Y/%m/%d %H:%M:%S')
     stop  = datetime.strptime('%s %s' % (args.stop_date, args.stop_time), '%Y/%m/%d %H:%M:%S')
-    start, stop = UTC.localize(start), UTC.localize(stop)
+    start, stop = start.replace(tzinfo=timezone.utc), stop.replace(tzinfo=timezone.utc)
     print("Scheduling pulsar monitoring (%s) for %s to %s" % (_PROJECT_ID,
                                                               start.strftime('%Y/%m/%d %H:%M:%S'),  
                                                               stop.strftime('%Y/%m/%d %H:%M:%S')))
@@ -463,7 +459,7 @@ def main(args):
         fh.write('#   6. Last MJD Observed                   #\n')
         fh.write('#                                          #\n')
         fh.write('# Updated:                                 #\n')
-        fh.write("#   %s UTC                #\n" % datetime.utcnow().strftime('%Y/%m/%d %H:%M:%S'))
+        fh.write("#   %s UTC                #\n" % datetime.now(tz=timezone.utc).strftime('%Y/%m/%d %H:%M:%S'))
         fh.write('#                                          #\n')
         fh.write('############################################\n')
         for bdy in bdys:

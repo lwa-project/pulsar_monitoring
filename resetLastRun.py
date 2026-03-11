@@ -11,7 +11,7 @@ import ephem
 import numpy
 import shutil
 import argparse
-from datetime import datetime
+from datetime import datetime, timezone
 
 from runPulsarMonitoring import _CATALOG_FILENAME, Pulsar
 
@@ -94,7 +94,7 @@ def main(args):
         fh.write('#   6. Last MJD Observed                   #\n')
         fh.write('#                                          #\n')
         fh.write('# Updated:                                 #\n')
-        fh.write("#   %s UTC                #\n" % datetime.utcnow().strftime('%Y/%m/%d %H:%M:%S'))
+        fh.write("#   %s UTC                #\n" % datetime.now(tz=timezone.utc).strftime('%Y/%m/%d %H:%M:%S'))
         fh.write('#                                          #\n')
         fh.write('############################################\n')
         for bdy in bdys:
